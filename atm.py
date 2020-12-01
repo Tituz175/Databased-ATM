@@ -12,10 +12,35 @@ def my_select():
     global select
     select = input("Make a selection: ")
 
+def db_check():
+    global user_id
+    global phone
+    query = "select User_id, Phone from users where Email = %s and Pin = %s"
+    values = (login_email,login_pin)
+    cursor.execute(query,values)
+    result = cursor.fetchone()
+    if result == None:
+        print("Sorry, Your login details are invalid.")
+        print("\n")
+        welcome()
+    else:
+        user_id = result[0]
+        phone = result[1]
+        print("Welcome")
+        #user_dashboard()
+
+def login():
+    global login_email
+    global login_pin
+    print("Welcome, we are glad to have you here.")
+    login_email = input("Please input your E-mail: ")
+    login_pin = input("Please input your Password: ")
+    db_check()
+
 # this function updates the database with the newly created user's details.
 def db_update():
     query = "insert into users(First_Name,Last_Name,Email,Phone,Pin)values(%s,%s,%s,%s,%s)"
-    values = (first_name,last_name,email,phone,password)
+    values = (first_name,last_name,email,phone,pin)
     cursor.execute(query,values)
     db.commit()
 
@@ -25,25 +50,25 @@ def registration():
     global last_name
     global email
     global phone
-    global password
+    global pin
     print("\nWelcome, we are glad to have you here.\nPlease give answers to the following questions.")
     first_name = input("What is your First Name? ")
     last_name = input("What is your Last Name? ")
     email = input("Please enter your E-mail ")
     phone = input("Please enter your Phone number ")
-    password = input("Input desire Password ")
-    confirm = input("Please confirm your Password ")
+    pin = input("Input desire Pin ")
+    confirm = input("Please confirm your Pin ")
     query = "select * from users where Email = %s"
     value = (email)
     cursor.execute(query,(value,))
     result = cursor.fetchone()
     if result == None:
-        if password == confirm:
+        if pin == confirm:
             db_update()
             print("\nAccount created sucessfully.\nDo you want to login?\n1. Yes\n2. No")
-            # my_select()
-            # if select == "1":
-            #     login()
+            my_select()
+            if select == "1":
+                login()
             # elif select == "2":
             #     log_out()
         else:
@@ -61,7 +86,7 @@ def welcome():
     if select == "1":
         registration()
     elif select == "2":
-        print("done")
+        login()
     else:
         print("Sorry, Invalid selection.")
 

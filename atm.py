@@ -7,6 +7,7 @@ import datetime as dt
 db = con.connect(host="localhost",database="db_atm",username="root",password="")
 cursor = db.cursor()
 
+# this funtion generate time and date for transactions.
 def my_time():
     global thyme
     global my_date
@@ -24,6 +25,7 @@ def another_option():
     print("Do you want to perform another transaction?\n1.Yes\n2.No")
     my_select()
 
+# this is the function in charge reduction in the user's account.
 def money_out(i):
     my_time()
     query = "select Balance, First_Name, Last_Name from users where User_id = %s"
@@ -42,18 +44,12 @@ def money_out(i):
     db.commit()
     print("\n" + result[1] + " " + result[2] + ", your transaction was successful.")
 
+# this funtion promt the user to continue the transaction.
 def proceed_transaction():
     print("\nDo you want to proceed with this transaction?\n1. Yes\n2. No")
     my_select()
-    if select == "1":
-        money_out(amount)
-    elif select == "2":
-        print("Your transaction terminated.")
-        my_withdraw()
-    else:
-        print("Sorry, your selection is invalid.")
-        user_dashboard()
 
+# this check whether the user's balance is sufficient for the transaction.
 def my_check(i):
     global amount
     global checkResult
@@ -62,10 +58,19 @@ def my_check(i):
     value = (user_id)
     cursor.execute(query,(value,))
     result = cursor.fetchone()
-    print(result[0])
     checkResult = result[0] >= i
-    print (checkResult)
 
+# function is in charge of other withdraw option.
+def my_other():
+    global otherMoney
+    query = "select First_Name from users where User_id = %s"
+    value = (user_id)
+    cursor.execute(query,(value,))
+    result = cursor.fetchone()
+    print(result[0] + ", Please input the amount you want to withdraw.")
+    otherMoney = int(input("Right here: "))
+
+# this function print out the options in withdraw.
 def my_withdraw():
     query = "select First_Name from users where User_id = %s"
     value = (user_id)
@@ -77,6 +82,14 @@ def my_withdraw():
         my_check(10000)
         if checkResult == True:
             proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
             another_option()
             if select == "1":
                 my_withdraw()
@@ -88,7 +101,23 @@ def my_withdraw():
             print("Sorry, You do not have sufficient fund.")
     elif select == "2":
         my_check(5000)
-        another_option()
+        if checkResult == True:
+            proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
+            another_option()
+            if select == "1":
+                my_withdraw()
+            elif select == "2":
+                user_dashboard()
+        else:
+            return print("Sorry, Invalid selection.")
         if select == "1":
             my_withdraw()
         elif select == "2":
@@ -97,7 +126,17 @@ def my_withdraw():
             return print("Sorry, Invalid selection.")
     elif select == "3":
         my_check(2000)
-        another_option()
+        if checkResult == True:
+            proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
+            another_option()
         if select == "1":
             my_withdraw()
         elif select == "2":
@@ -106,7 +145,17 @@ def my_withdraw():
             return print("Sorry, Invalid selection.")
     elif select == "4":
         my_check(1000)
-        another_option()
+        if checkResult == True:
+            proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
+            another_option()
         if select == "1":
             my_withdraw()
         elif select == "2":
@@ -115,7 +164,17 @@ def my_withdraw():
             return print("Sorry, Invalid selection.")
     elif select == "5":
         my_check(500)
-        another_option()
+        if checkResult == True:
+            proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
+            another_option()
         if select == "1":
             my_withdraw()
         elif select == "2":
@@ -123,16 +182,25 @@ def my_withdraw():
         else:
             return print("Sorry, Invalid selection.")
     elif select == "6":
-        pass
-        # my_other()
-        # my_check(otherMoney)
-        # another_option()
-        # if select == "1":
-        #     my_withdraw()
-        # elif select == "2":
-        #     user_dashboard()
-        # else:
-        #     return print("Sorry, Invalid selection.")
+        my_other()
+        my_check(otherMoney)
+        if checkResult == True:
+            proceed_transaction()
+            if select == "1":
+                money_out(amount)
+            elif select == "2":
+                print("Your transaction terminated.")
+                my_withdraw()
+            else:
+                print("Sorry, your selection is invalid.")
+                user_dashboard()
+            another_option()
+        if select == "1":
+            my_withdraw()
+        elif select == "2":
+            user_dashboard()
+        else:
+            return print("Sorry, Invalid selection.")
     elif select == "7":
         user_dashboard()
     else:

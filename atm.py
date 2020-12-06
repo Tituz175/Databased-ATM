@@ -54,7 +54,7 @@ def money_nout(i):
     balance_before = result[0]
     balance_after = result[0]
     query = "insert into transactions(User_id, Date, Time, Balance_Before, Balance_After, Remark, Status)values(%s,%s,%s,%s,%s,%s,%s)"
-    values = (user_id,my_date,thyme,balance_before,balance_after,"withdrawal of #" + str(i),"Unsuccessful")
+    values = (user_id,my_date,thyme,balance_before,balance_after," withdrawn #" + str(i),"Unsuccessful")
     cursor.execute(query,values)
     db.commit()
     print(str(result[1]) + " " + str(result[2]) + ", your transaction was unsuccessful due to insufficient fund.")
@@ -232,6 +232,147 @@ def my_withdraw():
         print("Sorry, Invalid selection.")
         user_dashboard()
 
+def my_receiver():
+    global rEmail
+    print("\nKindly input the receiver's E-mail")
+    rEmail = input("Right here: ")
+
+def db_transfer():
+    my_time()
+    query = "select Balance, First_Name, Last_Name, Balance, User_id from users where Email = %s"
+    value = (rEmail)
+    cursor.execute(query,(value,))
+    result_receiver = cursor.fetchone()
+    if result_receiver == None:
+        print("\nSorry, the E-mail is invalid. Kindly check and input valid E-mail.")
+        my_transfer()
+    else:
+        query = "select Balance, First_Name, Last_Name from users where User_id = " + str(user_id)
+        cursor.execute(query)
+        result_sender = cursor.fetchone()
+        balance_beforeSender = result_sender[0]
+        balance_afterSender = result_sender[0] - amount
+        query = "update users set Balance = %s where User_id = %s"
+        values = (balance_afterSender,user_id)
+        cursor.execute(query,values)
+        db.commit()
+        balance_beforeReceiver = result_receiver[-2]
+        balance_afterReceiver = result_receiver[-2] + amount
+        receiver_id = result_receiver[-1]
+        query = "insert into transactions(User_id, Date, Time, Balance_Before, Receiver_id, Debit, Balance_After, Remark, Status)values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        values = (user_id,my_date,thyme,balance_beforeSender,receiver_id,amount,balance_afterSender," transfered #" + str(amount) + " to " + result_receiver[1] + " " + result_receiver[2],"Successful")
+        cursor.execute(query,values)
+        db.commit()  
+        query = "insert into transactions(User_id, Date, Time, Balance_Before, Sender_id, Credit, Balance_After, Remark, Status)values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        values = (receiver_id,my_date,thyme,balance_beforeReceiver,user_id,amount,balance_afterReceiver," received #" + str(amount) + " from " + result_sender[1] + " " + result_sender[2],"Successful")
+        cursor.execute(query,values)
+        db.commit()
+        query = "update users set Balance = %s where Email = %s"
+        values = (balance_afterReceiver,rEmail)
+        cursor.execute(query,values)
+        db.commit()
+        return print("\n" + result_sender[1] + ", your transfer of #" + str(amount) + " to " + result_receiver[1] + " " + result_receiver[2] + " done successfully.")
+
+
+def my_transfer():
+    query = "select First_Name from users where User_id = %s"
+    value = (user_id)
+    cursor.execute(query,(value,))
+    result = cursor.fetchone()
+    print("\n" + result[0] + ", how much do you want to transfer?\n1. #10000\n2. #5000\n3. #2000\n4. #1000\n5. #500\n6. Others\n7. Back")
+    my_select()
+    if select == "1":
+        my_check(10000)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0] + ", you do not have sufficient fund.")
+    elif select == "2":
+        my_check(5000)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0][0] + ", you do not have sufficient fund.")
+    elif select == "3":
+        my_check(2000)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0][0] + ", you do not have sufficient fund.")
+    elif select == "4":
+        my_check(1000)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0][0] + ", you do not have sufficient fund.")
+    elif select == "5":
+        my_check(500)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0][0] + ", you do not have sufficient fund.")
+    elif select == "6":
+        pass
+        # transfer_other()
+        # my_check(otherTransfer)
+        # if checkResult == True:
+        #     my_receiver()
+        #     db_transfer()
+        #     another_option()
+        #     if select == "1":
+        #         my_transfer()
+        #     elif select == "2":
+        #         user_dashboard()
+        #     else:
+        #         print("Sorry, invalid selection.")
+        # else:
+        #     return print(result[0][0] + ", you do not have sufficient fund.")
+    elif select == "7":
+        user_dashboard()
+    else:
+        print("Sorry, invalid selection.")
+        user_dashboard()
+
 # function is charge of checking and displaying user's balance.
 def my_balance():
     query = "select First_Name, Last_Name, Balance from users where User_id = %s"
@@ -288,8 +429,7 @@ def user_dashboard():
     if select == "1":
         my_withdraw()
     elif select == "2":
-        pass
-        # my_transfer()
+        my_transfer()
     elif select == "3":
         pass
         # my_ask()

@@ -44,6 +44,21 @@ def money_out(i):
     db.commit()
     print("\n" + result[1] + " " + result[2] + ", your transaction was successful.")
 
+# this function update the database once the balance is not sufficient for the transaction. 
+def money_nout(i):
+    my_time()
+    query = "select Balance, First_Name, Last_Name from users where User_id = %s"
+    value = (user_id)
+    cursor.execute(query,(value,))
+    result = cursor.fetchone()
+    balance_before = result[0]
+    balance_after = result[0]
+    query = "insert into transactions(User_id, Date, Time, Balance_Before, Balance_After, Remark, Status)values(%s,%s,%s,%s,%s,%s,%s)"
+    values = (user_id,my_date,thyme,balance_before,balance_after,"withdrawal of #" + str(i),"Unsuccessful")
+    cursor.execute(query,values)
+    db.commit()
+    print(str(result[1]) + " " + str(result[2]) + ", your transaction was unsuccessful due to insufficient fund.")
+
 # this funtion promt the user to continue the transaction.
 def proceed_transaction():
     print("\nDo you want to proceed with this transaction?\n1. Yes\n2. No")
@@ -98,6 +113,7 @@ def my_withdraw():
             else:
                 return print("Sorry, Invalid selection.")
         else:
+            money_nout(10000)
             print("Sorry, You do not have sufficient fund.")
     elif select == "2":
         my_check(5000)
@@ -116,14 +132,11 @@ def my_withdraw():
                 my_withdraw()
             elif select == "2":
                 user_dashboard()
+            else:
+                return print("Sorry, Invalid selection.")
         else:
-            return print("Sorry, Invalid selection.")
-        if select == "1":
-            my_withdraw()
-        elif select == "2":
-            user_dashboard()
-        else:
-            return print("Sorry, Invalid selection.")
+            money_nout(5000)
+            print("Sorry, You do not have sufficient fund.")
     elif select == "3":
         my_check(2000)
         if checkResult == True:
@@ -137,12 +150,15 @@ def my_withdraw():
                 print("Sorry, your selection is invalid.")
                 user_dashboard()
             another_option()
-        if select == "1":
-            my_withdraw()
-        elif select == "2":
-            user_dashboard()
+            if select == "1":
+                my_withdraw()
+            elif select == "2":
+                user_dashboard()
+            else:
+                return print("Sorry, Invalid selection.")
         else:
-            return print("Sorry, Invalid selection.")
+            money_nout(2000)
+            print("Sorry, You do not have sufficient fund.")
     elif select == "4":
         my_check(1000)
         if checkResult == True:
@@ -156,12 +172,15 @@ def my_withdraw():
                 print("Sorry, your selection is invalid.")
                 user_dashboard()
             another_option()
-        if select == "1":
-            my_withdraw()
-        elif select == "2":
-            user_dashboard()
+            if select == "1":
+                my_withdraw()
+            elif select == "2":
+                user_dashboard()
+            else:
+                return print("Sorry, Invalid selection.")
         else:
-            return print("Sorry, Invalid selection.")
+            money_nout(1000)
+            print("Sorry, You do not have sufficient fund.")
     elif select == "5":
         my_check(500)
         if checkResult == True:
@@ -175,12 +194,15 @@ def my_withdraw():
                 print("Sorry, your selection is invalid.")
                 user_dashboard()
             another_option()
-        if select == "1":
-            my_withdraw()
-        elif select == "2":
-            user_dashboard()
+            if select == "1":
+                my_withdraw()
+            elif select == "2":
+                user_dashboard()
+            else:
+                return print("Sorry, Invalid selection.")
         else:
-            return print("Sorry, Invalid selection.")
+            money_nout(500)
+            print("Sorry, You do not have sufficient fund.")
     elif select == "6":
         my_other()
         my_check(otherMoney)
@@ -195,12 +217,15 @@ def my_withdraw():
                 print("Sorry, your selection is invalid.")
                 user_dashboard()
             another_option()
-        if select == "1":
-            my_withdraw()
-        elif select == "2":
-            user_dashboard()
+            if select == "1":
+                my_withdraw()
+            elif select == "2":
+                user_dashboard()
+            else:
+                return print("Sorry, Invalid selection.")
         else:
-            return print("Sorry, Invalid selection.")
+            money_nout(amount)
+            print("Sorry, You do not have sufficient fund.")
     elif select == "7":
         user_dashboard()
     else:
@@ -230,6 +255,28 @@ def log_out():
     result = cursor.fetchone()
     print("\nThank you, " + result[0] +" "+ result[1] + " for banking with us. Have a nice day.\n")
 
+# this function is responsible for displaying of user transaction history.
+def my_histroy():
+    name = "select First_Name, Last_Name from users where User_id = %s"
+    value = (user_id)
+    cursor.execute(name,(value,))
+    output = cursor.fetchone()
+    query = "select users.User_id,users.First_Name,users.Last_Name,transactions.Tran_id,transactions.Date,transactions.Time,transactions.Balance_After,transactions.Remark,transactions.Status From transactions inner join users on transactions.User_id=users.User_id where users.User_id = %s"
+    value = (user_id)
+    cursor.execute(query,(value,))
+    result = cursor.fetchall()
+    if len(result) == 0:
+        print(str(output[0]) + " " + str(output[1]) + ", you do not have any transaction histroy.")
+    else:
+        for details in result:
+            print("\n" + "On " + str(details[4]) + " exactly " + str(details[5]) + ", you " + str(details[1]) + " " + str(details[2])  + str(details[-2]) + " which was " + str(details[-1]) + ".")
+    print(" ")
+    another_option()
+    if select == "1":
+        user_dashboard()
+    else:
+        return log_out()
+
 # this function print out the user dashboard environment.
 def user_dashboard():
     query = "select First_Name, Last_Name from users where User_id = %s"
@@ -249,8 +296,7 @@ def user_dashboard():
     elif select == "4":
         my_balance()
     elif select == "5":
-        pass
-        # my_histroy()
+        my_histroy()
     elif select == "6":
         log_out()
 

@@ -232,13 +232,19 @@ def my_withdraw():
         print("Sorry, Invalid selection.")
         user_dashboard()
 
+# function request for the receiver's email address.
 def my_receiver():
     global rEmail
     print("\nKindly input the receiver's E-mail")
     rEmail = input("Right here: ")
 
+# this function update the database after each transfer.
 def db_transfer():
     my_time()
+    check = "select Email from users where User_id = %s"
+    valueUser_id = (user_id)
+    cursor.execute(check,(valueUser_id,))
+    emailOutput = cursor.fetchone()
     query = "select Balance, First_Name, Last_Name, Balance, User_id from users where Email = %s"
     value = (rEmail)
     cursor.execute(query,(value,))
@@ -246,6 +252,9 @@ def db_transfer():
     if result_receiver == None:
         print("\nSorry, the E-mail is invalid. Kindly check and input valid E-mail.")
         my_transfer()
+    elif emailOutput[0] == rEmail:
+        print(emailOutput)
+        return print("\nError, You are sending funds to your account from your account.\n")
     else:
         query = "select Balance, First_Name, Last_Name from users where User_id = " + str(user_id)
         cursor.execute(query)
@@ -273,7 +282,17 @@ def db_transfer():
         db.commit()
         return print("\n" + result_sender[1] + ", your transfer of #" + str(amount) + " to " + result_receiver[1] + " " + result_receiver[2] + " done successfully.")
 
+# this function takes care of transfer amount that is not on the transfer options.
+def transfer_other():
+    global amount
+    query = "select First_Name from users where User_id = %s"
+    value = (user_id)
+    cursor.execute(query,(value))
+    result = cursor.fetchone()
+    print(result[0] + ", Please input the amount you want to transfer.")
+    amount = int(input("Right here: "))
 
+# this function is responsible for transfer transactions.
 def my_transfer():
     query = "select First_Name from users where User_id = %s"
     value = (user_id)
@@ -308,7 +327,7 @@ def my_transfer():
             else:
                 print("Sorry, invalid selection.")
         else:
-            return print(result[0][0] + ", you do not have sufficient fund.")
+            return print(result[0] + ", you do not have sufficient fund.")
     elif select == "3":
         my_check(2000)
         if checkResult == True:
@@ -322,7 +341,7 @@ def my_transfer():
             else:
                 print("Sorry, invalid selection.")
         else:
-            return print(result[0][0] + ", you do not have sufficient fund.")
+            return print(result[0] + ", you do not have sufficient fund.")
     elif select == "4":
         my_check(1000)
         if checkResult == True:
@@ -336,7 +355,7 @@ def my_transfer():
             else:
                 print("Sorry, invalid selection.")
         else:
-            return print(result[0][0] + ", you do not have sufficient fund.")
+            return print(result[0] + ", you do not have sufficient fund.")
     elif select == "5":
         my_check(500)
         if checkResult == True:
@@ -350,23 +369,22 @@ def my_transfer():
             else:
                 print("Sorry, invalid selection.")
         else:
-            return print(result[0][0] + ", you do not have sufficient fund.")
+            return print(result[0] + ", you do not have sufficient fund.")
     elif select == "6":
-        pass
-        # transfer_other()
-        # my_check(otherTransfer)
-        # if checkResult == True:
-        #     my_receiver()
-        #     db_transfer()
-        #     another_option()
-        #     if select == "1":
-        #         my_transfer()
-        #     elif select == "2":
-        #         user_dashboard()
-        #     else:
-        #         print("Sorry, invalid selection.")
-        # else:
-        #     return print(result[0][0] + ", you do not have sufficient fund.")
+        transfer_other()
+        my_check(amount)
+        if checkResult == True:
+            my_receiver()
+            db_transfer()
+            another_option()
+            if select == "1":
+                my_transfer()
+            elif select == "2":
+                user_dashboard()
+            else:
+                print("Sorry, invalid selection.")
+        else:
+            return print(result[0] + ", you do not have sufficient fund.")
     elif select == "7":
         user_dashboard()
     else:
